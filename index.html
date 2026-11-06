@@ -464,6 +464,7 @@ body.tv .ploca .zona>.zctl{top:4px;bottom:auto;left:16px;gap:8px;transform:trans
 .pinkeys button{height:56px;border-radius:16px;border:1px solid rgba(122,178,236,.28);background:rgba(18,30,46,.9);color:#e8eef4;font:700 22px var(--f-display);cursor:pointer}
 .pinkeys button:hover,.pinkeys button:focus-visible{background:rgba(122,178,236,.18)}.pinkeys .pinfn{font-size:14px;font-weight:600;color:#93a7bb}
 .pincard .pinok{width:100%}
+.pincard .pinalt{display:block;margin:10px auto 0;border:0;background:none;color:#9fb7d4;font:600 13px/1.2 var(--f-body);text-decoration:underline;cursor:pointer;padding:4px 8px}.pincard .pinalt:hover{color:#fff}
 .ploca .zcnt.lft{left:50%;top:calc(100% + 5px);transform:translateX(-50%);margin:0}
 .ploca .zcnt .coin{font-size:.6em;margin-left:2px;text-shadow:none}
 .ploca .zona b .zlab{all:unset;display:flex;align-items:center;gap:6px;padding:3px 6px 3px 3px;cursor:pointer;border-radius:999px}
@@ -1333,7 +1334,7 @@ body.editlay .kid.home [data-lg],body.editlay .kid.home .redge[data-lg] .col{tou
 <input type="file" id="fotoinp" accept="image/*" hidden>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="9" result="b"/><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10" result="g"/><feBlend in="SourceGraphic" in2="g"/></filter></defs></svg>
 
-<script>window.LYRA_VER="5ef5393473"</script><script src="demo-db.js?v=5ef5393473"></script>
+<script>window.LYRA_VER="12a30e13f7"</script><script src="demo-db.js?v=12a30e13f7"></script>
 <script>
 (() => {
 const KIDS = [
@@ -5276,20 +5277,20 @@ async function pinHash(pin, salt, it=120000){ const enc=new TextEncoder(), key=a
 async function pinLoad(){ if(PIN.doc!==undefined) return PIN.doc; try{ const d=await S.realDb.collection('postavke').doc('roditelj').get(); PIN.doc = d&&d.exists ? d.data() : null; }catch(_){ PIN.doc=null; } return PIN.doc; }
 // zaključavanje nakon 5 krivih pokušaja: 60 s
 const pinLockLeft=()=>{ let u=0; try{ u=Number(localStorage.getItem('zv-pin-lock'))||0; }catch(_){} return Math.max(0,u-Date.now()); };
-function pinPad({naslov, opis, onDone, onCancel}){ PIN.open=true; let val='';
+function pinPad({naslov, opis, onDone, onCancel, len, alt}){ PIN.open=true; let val=''; const L=(len>=4&&len<=6)?len:0;   // L = poznata duljina PIN-a → toliko točkica i samo se potvrdi
   const ov=document.createElement('div'); ov.className='pinov'; ov.setAttribute('role','dialog'); ov.setAttribute('aria-modal','true');
-  ov.innerHTML=`<div class="pincard"><div class="pinlock">🔒</div><h3>${naslov}</h3><p class="pinopis">${opis||''}</p><div class="pindots">${'<i></i>'.repeat(6)}</div><p class="pinmsg" aria-live="polite"></p>
+  ov.innerHTML=`<div class="pincard"><div class="pinlock">🔒</div><h3>${naslov}</h3><p class="pinopis">${opis||''}</p><div class="pindots">${'<i></i>'.repeat(L||6)}</div><p class="pinmsg" aria-live="polite"></p>
     <div class="pinkeys">${[1,2,3,4,5,6,7,8,9].map(n=>`<button type="button" data-pk="${n}">${n}</button>`).join('')}<button type="button" data-pk="c" class="pinfn">Odustani</button><button type="button" data-pk="0">0</button><button type="button" data-pk="b" class="pinfn" aria-label="Obriši">⌫</button></div>
-    <button type="button" class="btn gold pinok" data-pk="ok">Potvrdi</button></div>`;
+    <button type="button" class="btn gold pinok" data-pk="ok">Potvrdi</button>${alt?`<button type="button" class="pinalt" data-pk="alt">${alt.txt}</button>`:''}</div>`;
   document.body.appendChild(ov); const dots=[...ov.querySelectorAll('.pindots i')], msg=ov.querySelector('.pinmsg'), card=ov.querySelector('.pincard');
   const draw=()=>dots.forEach((d,i)=>d.classList.toggle('on', i<val.length));
   const close=()=>{ PIN.open=false; ov.remove(); document.removeEventListener('keydown', kd, true); };
   const fail=t=>{ msg.textContent=t; val=''; draw(); if(!RM()) card.animate([{transform:'translateX(0)'},{transform:'translateX(-14px)'},{transform:'translateX(12px)'},{transform:'translateX(-8px)'},{transform:'translateX(0)'}],{duration:380}); };
   const api={ fail, msg:t=>{ msg.textContent=t; }, reset:()=>{ val=''; draw(); }, close };
   const press=async k=>{ const lock=pinLockLeft(); if(lock && k!=='c'){ msg.textContent=`Previše pokušaja – pričekaj ${Math.ceil(lock/1000)} s`; return; }
-    if(k==='c'){ close(); onCancel&&onCancel(); return; } if(k==='b'){ val=val.slice(0,-1); draw(); return; }
+    if(k==='c'){ close(); onCancel&&onCancel(); return; } if(k==='b'){ val=val.slice(0,-1); draw(); return; } if(k==='alt'){ alt && alt.fn(api); return; }
     if(k==='ok'){ if(val.length<4){ fail('PIN ima 4 do 6 znamenki'); return; } const v=val; msg.textContent='…'; await onDone(v, api); return; }
-    if(val.length<6){ val+=k; draw(); msg.textContent=''; sndAt('tick', performance.now(), .25, card); } };
+    if(val.length<(L||6)){ val+=k; draw(); msg.textContent=''; sndAt('tick', performance.now(), .25, card); if(L && val.length===L) setTimeout(()=>press('ok'), 120); } };
   ov.addEventListener('click', e=>{ const b=e.target.closest('[data-pk]'); if(b){ e.stopPropagation(); press(b.dataset.pk); } else if(e.target===ov){ close(); onCancel&&onCancel(); } });
   const kd=e=>{ if(/^[0-9]$/.test(e.key)) press(e.key); else if(e.key==='Backspace') press('b'); else if(e.key==='Enter') press('ok'); else if(e.key==='Escape') press('c'); else return; e.preventDefault(); e.stopImmediatePropagation(); };
   document.addEventListener('keydown', kd, true); draw(); setTimeout(()=>{ const b=ov.querySelector('[data-pk="1"]'); b&&b.focus({preventScroll:true}); },30); return api; }
@@ -5297,12 +5298,13 @@ async function pinAsk(onOk){ if(PIN.open) return; const d=await pinLoad();
   if(!d){ // prvi put: postavljanje PIN-a (dvaput)
     let first=null; pinPad({naslov:'Postavi roditeljski PIN', opis:'Samo ti ćeš moći davati zvjezdice i mijenjati stanje. Upiši 4–6 znamenki.', onDone:async(v,api)=>{
       if(!first){ first=v; api.reset(); api.msg('Upiši isti PIN još jednom'); return; } if(v!==first){ first=null; api.fail('Nisu isti – kreni ispočetka'); return; }
-      const salt=[...crypto.getRandomValues(new Uint8Array(16))].map(b=>b.toString(16).padStart(2,'0')).join(''), doc={salt, hash:await pinHash(v,salt), it:120000, ts:new Date().toISOString()};
+      const salt=[...crypto.getRandomValues(new Uint8Array(16))].map(b=>b.toString(16).padStart(2,'0')).join(''), doc={salt, hash:await pinHash(v,salt), it:120000, len:v.length, ts:new Date().toISOString()};
       try{ await S.realDb.collection('postavke').doc('roditelj').set(doc); PIN.doc=doc; }catch(_){ api.fail('PIN nije spremljen – pokušaj ponovno'); return; }
       api.close(); pinSetOk(true); toast('🔒 Roditeljski PIN je postavljen'); onOk&&onOk(); } }); return; }
-  pinPad({naslov:'Roditeljski PIN', opis:'Ovo može samo roditelj. (Demo PIN: 1234)', onDone:async(v,api)=>{
+  let change=false;
+  pinPad({naslov:'Roditeljski PIN', opis:'Ovo može samo roditelj. (Demo PIN: 1111)', len:d.len, alt:{txt:'Promijeni PIN', fn:api=>{ change=true; api.reset(); api.msg('Upiši sadašnji PIN, zatim novi (4–6 znamenki)'); }}, onDone:async(v,api)=>{
     const h=await pinHash(v, d.salt, d.it||120000);
-    if(h===d.hash){ try{ localStorage.removeItem('zv-pin-bad'); }catch(_){} api.close(); pinSetOk(true); sndAt('chime', performance.now(), .4); onOk&&onOk(); return; }
+    if(h===d.hash){ try{ localStorage.removeItem('zv-pin-bad'); }catch(_){} api.close(); pinSetOk(true); sndAt('chime', performance.now(), .4); if(change){ PIN.doc=null; setTimeout(()=>pinAsk(()=>toast('🔒 Novi PIN je spremljen')), 150); return; } onOk&&onOk(); return; }
     let n=0; try{ n=(Number(localStorage.getItem('zv-pin-bad'))||0)+1; localStorage.setItem('zv-pin-bad', String(n)); if(n>=5){ localStorage.setItem('zv-pin-lock', String(Date.now()+60000)); localStorage.setItem('zv-pin-bad','0'); } }catch(_){}
     api.fail(n>=5 ? 'Previše pokušaja – zaključano 60 s' : `Krivi PIN (${n}/5)`); } }); }
 async function pinChange(){ const d=await pinLoad(); if(!d){ pinAsk(); return; } pinAsk(()=>{ PIN.doc=null; pinAsk(()=>toast('🔒 Novi PIN je spremljen')); }); }
@@ -5319,5 +5321,5 @@ fromHash(); boot();
 })();
 </script>
 
-<script src="demo-ui.js?v=5ef5393473"></script>
+<script src="demo-ui.js?v=12a30e13f7"></script>
 </body></html>
