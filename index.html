@@ -926,6 +926,8 @@ html{overflow-x:clip}
 /* kreda: zid iza svega u kartici */
 .kid.home>.kreda{position:absolute;left:0;top:0;width:100%;height:100%;z-index:0;pointer-events:none;border-radius:inherit}
 body.chalking,body.chalking *{cursor:crosshair!important;user-select:none!important}
+@media (hover:none){.kid.home{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}}
+body.chalking .kid.home{touch-action:none}
 body.erasing,body.erasing *{cursor:cell!important;user-select:none!important}
 .kclr{all:unset;position:absolute;right:6px;bottom:0;font-size:13px;line-height:1;padding:4px 6px;border-radius:8px;cursor:pointer;opacity:.28;transition:opacity .2s,background .2s}
 .kset{all:unset;position:absolute;left:6px;bottom:0;font-size:13px;line-height:1;padding:4px 6px;border-radius:8px;cursor:pointer;opacity:.28;transition:opacity .2s,background .2s}
@@ -1336,7 +1338,7 @@ body.editlay .kid.home [data-lg],body.editlay .kid.home .redge[data-lg] .col{tou
 <input type="file" id="fotoinp" accept="image/*" hidden>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="9" result="b"/><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10" result="g"/><feBlend in="SourceGraphic" in2="g"/></filter></defs></svg>
 
-<script>window.LYRA_VER="fd57ac3651"</script><script src="demo-db.js?v=fd57ac3651"></script>
+<script>window.LYRA_VER="278f91f949"</script><script src="demo-db.js?v=278f91f949"></script>
 <script>
 (() => {
 const KIDS = [
@@ -2392,15 +2394,25 @@ function chLoad(k,d){ const st=chSt(k); if(!d || (d.ts||0)<=st.ts || (CHD&&CHD.k
 function chListen(){ setTimeout(()=>{ CH_SNAP=true; chReady(); }, 6000);   // ako baza krede ne odgovori, igračke ipak krenu
   try{ S.realDb.collection('kreda').onSnapshot(q=>{ q.docs.forEach(d=>chLoad(d.id, d.data())); if(snapDef(q)){ CH_SNAP=true; chReady(); } }, ()=>{ CH_SNAP=true; chReady(); }); }catch(e){ CH_SNAP=true; } }
 let CH_SND=0;
+// dodir (mobitel/tablet): drži prst na kartici ~0,45 s → kreda; pomak prije toga = obično listanje stranice
+window.addEventListener('pointerdown', e=>{ if(e.pointerType!=='touch' || CHD || S.layEdit || !CH_SNAP || !e.isPrimary) return;
+  const card=e.target.closest && e.target.closest('.kid.home'); if(!card || e.target.closest('.kblk .kb')) return; const cv=card.querySelector(':scope > canvas.kreda'); if(!cv) return;
+  CHD={k:cv.dataset.kreda, card, cv, pid:e.pointerId, mode:'d', armed:false, touch:true, sx:e.clientX, sy:e.clientY, last:chPt(e,cv), timer:0};
+  CHD.timer=setTimeout(()=>{ const d=CHD; if(!d || !d.touch || d.armed) return; chArm(); try{ navigator.vibrate && navigator.vibrate(15); }catch(_){} sndAt('kreda', performance.now(), .5, d.card); }, 450); }, true);
+document.addEventListener('touchmove', e=>{ const d=CHD; if(!d || !d.touch) return; const t=e.touches[0]; if(!t) return;
+  if(d.armed){ e.preventDefault(); const p=chPt(t,d.cv); chSeg(d.ctx,d.last,p,d.mode,d.rgb); const L=Math.hypot(p.x-d.last.x,p.y-d.last.y); d.last=p; const now=performance.now(); if(L>2 && now-CH_SND>70){ CH_SND=now; sndAt('kreda', now, Math.min(1,.4+L/30), d.card); } return; }
+  if(Math.hypot(t.clientX-d.sx, t.clientY-d.sy)>10){ clearTimeout(d.timer); CHD=null; } }, {passive:false, capture:true});
+document.addEventListener('touchend', e=>{ if(CHD && CHD.touch && !e.touches.length) chEnd(); }, true);
+document.addEventListener('touchcancel', e=>{ if(CHD && CHD.touch) chEnd(); }, true);
 window.addEventListener('pointerdown', e=>{ if(CHD || S.layEdit || !CH_SNAP || (e.pointerType!=='mouse' && e.pointerType!=='pen')) return; if(e.button!==0 && e.button!==2) return;
   const card=e.target.closest && e.target.closest('.kid.home'); if(!card || e.target.closest('.kblk .kb')) return; const cv=card.querySelector(':scope > canvas.kreda'); if(!cv) return;
   CHD={k:cv.dataset.kreda, card, cv, pid:e.pointerId, mode:e.button===2?'e':'d', armed:false, sx:e.clientX, sy:e.clientY, last:chPt(e,cv), timer:0};
   if(e.button===2){ e.preventDefault(); CHD.ready=true; } else CHD.timer=setTimeout(()=>{ if(CHD) CHD.ready=true; },230); }, true);
-window.addEventListener('pointermove', e=>{ const d=CHD; if(!d || e.pointerId!==d.pid) return; if(!d.armed){ const m=Math.hypot(e.clientX-d.sx,e.clientY-d.sy); if(m>7 || (d.ready && m>2)) chArm(); else return; }
+window.addEventListener('pointermove', e=>{ const d=CHD; if(!d || d.touch || e.pointerId!==d.pid) return; if(!d.armed){ const m=Math.hypot(e.clientX-d.sx,e.clientY-d.sy); if(m>7 || (d.ready && m>2)) chArm(); else return; }
   const p=chPt(e,d.cv); chSeg(d.ctx,d.last,p,d.mode,d.rgb); const L=Math.hypot(p.x-d.last.x,p.y-d.last.y); d.last=p;
   const now=performance.now(); if(L>2 && now-CH_SND>70){ CH_SND=now; sndAt(d.mode==='e'?'brisi':'kreda', now, Math.min(1,.4+L/30), d.card); } }, true);
-window.addEventListener('pointerup', e=>{ if(CHD && e.pointerId===CHD.pid) chEnd(); }, true);
-window.addEventListener('pointercancel', e=>{ if(CHD && e.pointerId===CHD.pid) chEnd(); }, true);
+window.addEventListener('pointerup', e=>{ if(CHD && !CHD.touch && e.pointerId===CHD.pid) chEnd(); }, true);
+window.addEventListener('pointercancel', e=>{ if(CHD && !CHD.touch && e.pointerId===CHD.pid) chEnd(); }, true);   // dodir završava touchend (preglednik šalje pointercancel čim prst krene)
 // nakon pisanja kredom: klik koji slijedi nije klik (ne pokreće reakcije ni tipke)
 window.addEventListener('click', e=>{ if(performance.now()-CH_SUP<350 && e.target.closest && e.target.closest('.kid.home')){ e.preventDefault(); e.stopPropagation(); } }, true);
 window.addEventListener('contextmenu', e=>{ if(e.target.closest && e.target.closest('.kid.home')) e.preventDefault(); }, true);
@@ -5343,5 +5355,5 @@ fromHash(); boot();
 })();
 </script>
 
-<script src="demo-ui.js?v=fd57ac3651"></script>
+<script src="demo-ui.js?v=278f91f949"></script>
 </body></html>
