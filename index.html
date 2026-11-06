@@ -1336,7 +1336,7 @@ body.editlay .kid.home [data-lg],body.editlay .kid.home .redge[data-lg] .col{tou
 <input type="file" id="fotoinp" accept="image/*" hidden>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="9" result="b"/><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10" result="g"/><feBlend in="SourceGraphic" in2="g"/></filter></defs></svg>
 
-<script>window.LYRA_VER="100815e949"</script><script src="demo-db.js?v=100815e949"></script>
+<script>window.LYRA_VER="fd57ac3651"</script><script src="demo-db.js?v=fd57ac3651"></script>
 <script>
 (() => {
 const KIDS = [
@@ -2632,7 +2632,13 @@ function layApply(){ const L=layGet(), cards=[...document.querySelectorAll('.kid
 function layFixNatpis(){ document.querySelectorAll('.kid.home').forEach(card=>{ const el=card.querySelector('.rank .tt'); if(!el || !el.__lay || !el.offsetWidth) return; let [dx,dy]=el.__lay; el.__lay=null;
   const sc=(el.getBoundingClientRect().height/el.offsetHeight)||1, kn=card.querySelector('.kidtop .kname h2')||card.querySelector('.kidtop .kname');
   if(kn && kn.offsetHeight){ const gap=kn.getBoundingClientRect().bottom+6-el.getBoundingClientRect().top; if(gap>0){ dy=Math.round(dy+gap/sc); el.style.translate=`${dx}px ${dy}px`; } }
-  const jn=card.querySelector('.redge .nd'); if(jn && jn.offsetWidth){ const a=el.getBoundingClientRect(), j=jn.getBoundingClientRect(); if(a.right>j.left-6 && a.left<j.right && a.bottom>j.top && a.top<j.bottom){ const cl=card.getBoundingClientRect(), mv=Math.min(a.right-(j.left-6), a.left-(cl.left+6)); if(mv>0) el.style.translate=`${Math.round(dx-mv/sc)}px ${dy}px`; } } }); }
+  const mob=matchMedia('(max-width:640px)').matches, cl=card.getBoundingClientRect();
+  if(mob){   // mobitel: naziv razine po sredini ispod imena (kao slika i ime), štit u gornjem lijevom kutu kartice
+    if(kn){ const a=el.getBoundingClientRect(), k=kn.getBoundingClientRect(), cx=(k.left+k.right)/2-(a.left+a.right)/2; el.style.translate=`${Math.round(dx+cx/sc)}px ${dy}px`; }
+    const med=card.querySelector('.rank .med'); if(med && med.offsetWidth){ const t=layTr(med), r=med.getBoundingClientRect(), ms=(r.width/med.offsetWidth)||1; med.style.translate=`${Math.round(t.x+(cl.left+10-r.left)/ms)}px ${Math.round(t.y+(cl.top+10-r.top)/ms)}px`; }
+    return; }
+  const jn=card.querySelector('.redge .nd'); if(jn && jn.offsetWidth){ const a=el.getBoundingClientRect(), j=jn.getBoundingClientRect(); if(a.right>j.left-6 && a.left<j.right && a.bottom>j.top && a.top<j.bottom){ const mv=Math.min(a.right-(j.left-6), a.left-(cl.left+6)); if(mv>0) el.style.translate=`${Math.round(dx-mv/sc)}px ${dy}px`; } } }); }
+window.addEventListener('resize', ()=>{ clearTimeout(window.__lfx); window.__lfx=setTimeout(()=>{ if(typeof layApply==='function' && document.querySelector('.kid.home')) layApply(); },150); });
 function layGuideH(y){ document.querySelectorAll('.kid.home').forEach(card=>{ let gd=card.querySelector(':scope>.layguideh'); if(y==null){ if(gd) gd.remove(); return; }
   if(!gd){ gd=document.createElement('i'); gd.className='layguideh'; card.appendChild(gd); } gd.style.top=y+'px'; }); }
 function layGuide(x){ document.querySelectorAll('.kid.home').forEach(card=>{ let gd=card.querySelector(':scope>.layguide'); if(x==null){ if(gd) gd.remove(); return; }
@@ -5337,5 +5343,5 @@ fromHash(); boot();
 })();
 </script>
 
-<script src="demo-ui.js?v=100815e949"></script>
+<script src="demo-ui.js?v=fd57ac3651"></script>
 </body></html>
