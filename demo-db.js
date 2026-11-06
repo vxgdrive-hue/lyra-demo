@@ -1,6 +1,6 @@
 /* Lyra demo – zamjenska baza: podaci žive samo u ovom pregledniku (localStorage), kreću iz izmišljene demo obitelji */
 (function(){
-  var KEY='lyra-demo-db', VER=1;
+  var KEY='lyra-demo-db', VER=3;
   var pad=function(n){ return String(n).padStart(2,'0'); };
   var dstr=function(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); };
   var ago=function(n){ var d=new Date(); d.setHours(12,0,0,0); d.setDate(d.getDate()-n); return d; };
@@ -27,6 +27,7 @@
     add('toni',2,{kat:'kazna',v:0,ploca:false});
     add('toni',1,{v:1,p:'Matematika',ed:'NE',ploca:false,nap:'Dano kroz aplikaciju – čeka e-Dnevnik'});
     add('toni',0,{v:0,p:'Pomoć u kući',ploca:false});
+    add('toni',1,{v:1,p:'Engleski jezik',ploca:false}); add('toni',0,{v:1,p:'Hrvatski jezik',ed:'NE',ploca:false,nap:'Dano kroz aplikaciju – čeka e-Dnevnik'}); add('toni',0,{v:0,p:'Nogomet – 2 treninga',ploca:false});
     /* Ema (4. razred) – srca i jednorog */
     [[25,'Hrvatski jezik'],[24,'Matematika'],[21,'Engleski jezik'],[20,'Likovna kultura'],[18,'Priroda i društvo'],[15,'Glazbena kultura'],[13,'Matematika'],[12,'Hrvatski jezik'],[10,'Engleski jezik']].forEach(function(x){ add('ema',x[0],{v:1,p:x[1]}); });
     [[22,'Ples – 2 treninga'],[17,'Čitanje lektire'],[11,'Ples – 2 treninga']].forEach(function(x){ add('ema',x[0],{v:0,p:x[1]}); });
@@ -44,9 +45,12 @@
     ['toni','ema','malisa'].forEach(function(k){ var V=0,M=0; Object.keys(Z).forEach(function(id){ var z=Z[id]; if(z.dijete!==k||z.dano!=='DA'||z.naPloci!=='DA'||!(z.plocaTs<pTs)) return;
       if(z.kategorija==='kupnja'){ V-=z.kV; M-=z.kM; } else { var s=z.kategorija==='kazna'?-1:1; if(z.zvjezdica==='V') V+=s; else M+=s; } }); st[k]={V:Math.max(0,V),M:Math.max(0,M)}; });
     var ploca={}; ploca['ploca-'+D(P_DAYS)]={datum:D(P_DAYS), kreirano:pTs, stanje:st, izvor:'aplikacija'};
+    var last=Object.keys(Z).reduce(function(m,id){ var t=Z[id].xpTs||Z[id].kreirano||''; return t>m?t:m; }, new Date().toISOString());
+    var razine={start:{toni:{xp:17,ts:last}, ema:{xp:7,ts:last}, malisa:{xp:12,ts:last}}, napomena:'Demo: početne razine'};
     return { _v:VER, zvjezdice:Z, ploca:ploca, provjere:{}, koraci:{}, prijedlozi:{}, kreda:{},
       postavke:{ glavno:{vrijednostV:3, vrijednostM:1},
         djeca:{toni:'demo/toni.webp', ema:'demo/ema.webp', malisa:'demo/malisa.webp'},
+        razine:razine,
         roditelj:{salt:'6c797261646d6f31a1b2c3d4e5f60718', hash:'2fb705a538a03476bed016d57c66e419fa3c266f43b8c519e85e45e58d8d6a77', it:120000, ts:TS(30)} } };
   }
   var DB=null; try{ DB=JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){}

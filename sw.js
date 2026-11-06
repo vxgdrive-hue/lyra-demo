@@ -1,5 +1,5 @@
 /* Lyra demo – offline: aplikacija, slike, ikone i fontovi spremaju se u uređaj */
-const VER='lyra-9623c3a591';
+const VER='lyra-6550b429e8';
 const CORE=['./','index.html','demo-db.js','demo-ui.js','manifest.webmanifest','icons/icon-192.png','icons/icon-512.png','demo/toni.webp','demo/ema.webp','demo/malisa.webp'];
 self.addEventListener('install', e=>{ e.waitUntil(caches.open(VER).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())); });
 self.addEventListener('activate', e=>{ e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==VER).map(k=>caches.delete(k)))).then(()=>self.clients.claim())); });
