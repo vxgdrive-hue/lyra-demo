@@ -14,7 +14,7 @@
   function fsToggle(){ var d=document.documentElement; try{ if(fsOn()){ (document.exitFullscreen||document.webkitExitFullscreen).call(document); } else { (d.requestFullscreen||d.webkitRequestFullscreen).call(d); } }catch(e){} }
   function mount(){ if(document.getElementById('lyrabar')) return;
     var bar=document.createElement('div'); bar.id='lyrabar'; bar.setAttribute('role','toolbar'); bar.setAttribute('aria-label','Lyra demo');
-    bar.innerHTML='<b title="Izmišljena obitelj – ništa se ne šalje na internet">DEMO</b>'
+    bar.innerHTML='<b title="Izmišljena obitelj – ništa se ne šalje na internet · verzija '+(window.LYRA_VER||'?')+'">DEMO</b>'
       +'<button class="norm" id="lyrafs" title="Cijeli zaslon" aria-label="Cijeli zaslon">⛶</button>'
       +'<button class="norm" id="lyrainst" hidden title="Instaliraj kao aplikaciju">⬇<span class="lbl">Instaliraj</span></button>'
       +'<button class="norm" id="lyrareset" title="Vrati demo na početak">↺<span class="lbl">Na početak</span></button>'
@@ -31,5 +31,8 @@
     if(window.matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches) document.getElementById('lyrainst').hidden=true;
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', mount); else mount();
-  if('serviceWorker' in navigator && location.protocol==='https:'){ window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }
+  if('serviceWorker' in navigator && location.protocol==='https:'){
+    var had=!!navigator.serviceWorker.controller, done=false;
+    navigator.serviceWorker.addEventListener('controllerchange', function(){ if(had && !done){ done=true; location.reload(); } });   // nova verzija preuzela → jednom osvježi
+    window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js', {updateViaCache:'none'}).then(function(r){ try{ r.update(); }catch(e){} }).catch(function(){}); }); }
 })();
