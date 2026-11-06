@@ -832,7 +832,7 @@ html:has(#ovhost .ov){overflow:hidden;scrollbar-gutter:stable}
 /* V0: bez retka razine („X € skupljeno“ se vidi po novčiću, „još N ★“ po stupu desno) */
 
 /* V0: ime na vrpci točno po receptu Plakat v1 (pola na slici, pola ispod) */
-.kid.home:has(.v0m) .kidtop .kname{margin-top:-25px}
+.kid.home:has(.v0m) .kidtop .kname{margin-top:-10px}   /* ime samo malo dira okvir slike */
 .kid.home:has(.v0m) .kidtop .kname h2{padding:6px 22px;border-radius:10px;background:var(--kc);color:#0b131c;font:700 1.625rem/1.1 var(--f-display);white-space:nowrap;border:0;box-shadow:0 4px 0 rgba(0,0,0,.35);letter-spacing:0}
 .kid.home:has(.v0m) .boardnote .st{font-size:39px}
 /* ===== V10–V12: slika na gornjem lijevom uglu ===== */
@@ -1334,7 +1334,7 @@ body.editlay .kid.home [data-lg],body.editlay .kid.home .redge[data-lg] .col{tou
 <input type="file" id="fotoinp" accept="image/*" hidden>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="9" result="b"/><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10" result="g"/><feBlend in="SourceGraphic" in2="g"/></filter></defs></svg>
 
-<script>window.LYRA_VER="e86767e522"</script><script src="demo-db.js?v=e86767e522"></script>
+<script>window.LYRA_VER="f80b54ede8"</script><script src="demo-db.js?v=f80b54ede8"></script>
 <script>
 (() => {
 const KIDS = [
@@ -1416,7 +1416,7 @@ function applyKidColors(){ for(const k of KIDS){ const c=S.kboje&&S.kboje[k.id];
 async function setKidColor(kid, hex){ const old={...S.kboje}; S.kboje={...S.kboje,[kid]:hex}; applyKidColors(); render();
   try{ await S.db.collection('postavke').doc('boje').set(S.kboje); toast(`${KID[kid].ime} je sada ${(KPAL.find(x=>x[0]===hex)||['',''])[1]}`); }
   catch(e){ S.kboje=old; applyKidColors(); render(); toast('Boja nije spremljena – pokušaj ponovno'); } }
-const ava = (k, cls='') => { const id=S.foto[k.id]; return `<span class="ava ${cls}" style="--kc:${k.kc}">${id?`<img src="${/^demo\//.test(id)?esc(id):'/_blob/'+esc(id)}" alt="${esc(k.ime)}" draggable="false">`:`<span class="ini">${esc(k.ime[0])}</span>`}</span>`; };
+const ava = (k, cls='') => { const id=S.foto[k.id]; return `<span class="ava ${cls}" style="--kc:${k.kc}">${id?`<img src="${/^(demo\/|data:image\/)/.test(id)?esc(id):'/_blob/'+esc(id)}" alt="${esc(k.ime)}" draggable="false">`:`<span class="ini">${esc(k.ime[0])}</span>`}</span>`; };
 const starOf = (z,extra='') => isKup(z) ? KUPICO(extra) : isK(z) ? sadStar(z.zvjezdica!=='M', extra) : z.zvjezdica==='?' ? STAR('q') : starSVG(z.boja || (z.zvjezdica==='M'?'b':'y'), z.lice || VFACE[hashN(z.id)%VFACE.length], (z.zvjezdica==='M'?'m ':'')+extra);
 function toast(t){ const el=document.createElement('div'); el.className='toast'; el.textContent=t; document.body.appendChild(el); setTimeout(()=>el.remove(),2200); }
 
@@ -2623,7 +2623,9 @@ function layApply(){ const L=layGet(), cards=[...document.querySelectorAll('.kid
     cards.forEach(card=>layEls(card,g,sel).forEach(el=>{ el.dataset.lg=g; el.dataset.lgname=nm; if(!T || !el.offsetWidth){ el.style.translate=''; return; }
       let tx=T.cx, ty=T.cy;
       if(!el.classList.contains('redge')){ const W=card.clientWidth, H=card.clientHeight, hw=el.offsetWidth/2; if(!live) tx=T.cx*W/refW; tx=Math.max(-W/2+hw+2, Math.min(W/2-hw-2, tx)); ty=Math.max(0, Math.min(H, ty)); }
-      const n=layNat(el,card), dx=Math.round(tx-n.cx), dy=Math.round(ty-n.cy); el.style.translate = dx||dy ? `${dx}px ${dy}px` : ''; })); }); }
+      const n=layNat(el,card), dx=Math.round(tx-n.cx), dy=Math.round(ty-n.cy); el.style.translate = dx||dy ? `${dx}px ${dy}px` : '';
+      if(g==='natpis' && !live){ const kn=card.querySelector('.kidtop .kname h2')||card.querySelector('.kidtop .kname'); if(kn && kn.offsetHeight){ const gap=kn.getBoundingClientRect().bottom+6-el.getBoundingClientRect().top, sc=(el.getBoundingClientRect().height/el.offsetHeight)||1; if(gap>0) el.style.translate=`${dx}px ${Math.round(dy+gap/sc)}px`; } }   // naziv razine nikad ne ulazi u ime
+    })); }); }
 function layGuideH(y){ document.querySelectorAll('.kid.home').forEach(card=>{ let gd=card.querySelector(':scope>.layguideh'); if(y==null){ if(gd) gd.remove(); return; }
   if(!gd){ gd=document.createElement('i'); gd.className='layguideh'; card.appendChild(gd); } gd.style.top=y+'px'; }); }
 function layGuide(x){ document.querySelectorAll('.kid.home').forEach(card=>{ let gd=card.querySelector(':scope>.layguide'); if(x==null){ if(gd) gd.remove(); return; }
@@ -5321,5 +5323,5 @@ fromHash(); boot();
 })();
 </script>
 
-<script src="demo-ui.js?v=e86767e522"></script>
+<script src="demo-ui.js?v=f80b54ede8"></script>
 </body></html>
