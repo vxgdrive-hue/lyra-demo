@@ -581,6 +581,7 @@ body.tv .ploca .zona>.zctl{top:4px;bottom:auto;left:16px;gap:8px;transform:trans
 .ploca .zona b .zcoin{display:inline-flex;align-items:center;margin-left:4px;font-size:.62em;line-height:1;pointer-events:none}
 .ploca .zona b .zcoin .coin{margin:0 .1em}
 .ploca .zona>.zcnt.zcr{left:auto;right:12px;top:0;transform:translateY(-50%);margin:0;z-index:3}
+.ploca .zona.zcdown>.zcnt.zcr{top:calc(var(--zlh,22px) + 6px);transform:none;right:8px}   /* uska zona (mobitel): brojači ispod ruba, desno */
 .ov.board.big .ploca .zona>.zcnt.zcr{right:16px}
 body.tv .ploca .zona>.zcnt.zcr{margin:0!important;right:22px}
 .ploca .zona .znm .ch{display:inline-block}
@@ -1334,7 +1335,7 @@ body.editlay .kid.home [data-lg],body.editlay .kid.home .redge[data-lg] .col{tou
 <input type="file" id="fotoinp" accept="image/*" hidden>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="9" result="b"/><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10" result="g"/><feBlend in="SourceGraphic" in2="g"/></filter></defs></svg>
 
-<script>window.LYRA_VER="f80b54ede8"</script><script src="demo-db.js?v=f80b54ede8"></script>
+<script>window.LYRA_VER="81a86d84ad"</script><script src="demo-db.js?v=81a86d84ad"></script>
 <script>
 (() => {
 const KIDS = [
@@ -2624,8 +2625,13 @@ function layApply(){ const L=layGet(), cards=[...document.querySelectorAll('.kid
       let tx=T.cx, ty=T.cy;
       if(!el.classList.contains('redge')){ const W=card.clientWidth, H=card.clientHeight, hw=el.offsetWidth/2; if(!live) tx=T.cx*W/refW; tx=Math.max(-W/2+hw+2, Math.min(W/2-hw-2, tx)); ty=Math.max(0, Math.min(H, ty)); }
       const n=layNat(el,card), dx=Math.round(tx-n.cx), dy=Math.round(ty-n.cy); el.style.translate = dx||dy ? `${dx}px ${dy}px` : '';
-      if(g==='natpis' && !live){ const kn=card.querySelector('.kidtop .kname h2')||card.querySelector('.kidtop .kname'); if(kn && kn.offsetHeight){ const gap=kn.getBoundingClientRect().bottom+6-el.getBoundingClientRect().top, sc=(el.getBoundingClientRect().height/el.offsetHeight)||1; if(gap>0) el.style.translate=`${dx}px ${Math.round(dy+gap/sc)}px`; } }   // naziv razine nikad ne ulazi u ime
-    })); }); }
+      if(g==='natpis' && !live) el.__lay=[dx,dy];
+    })); }); layFixNatpis(); }
+// drugi prolaz (kad su sve skupine na mjestu): naziv razine nikad ne ulazi u ime ni u „još N“
+function layFixNatpis(){ document.querySelectorAll('.kid.home').forEach(card=>{ const el=card.querySelector('.rank .tt'); if(!el || !el.__lay || !el.offsetWidth) return; let [dx,dy]=el.__lay; el.__lay=null;
+  const sc=(el.getBoundingClientRect().height/el.offsetHeight)||1, kn=card.querySelector('.kidtop .kname h2')||card.querySelector('.kidtop .kname');
+  if(kn && kn.offsetHeight){ const gap=kn.getBoundingClientRect().bottom+6-el.getBoundingClientRect().top; if(gap>0){ dy=Math.round(dy+gap/sc); el.style.translate=`${dx}px ${dy}px`; } }
+  const jn=card.querySelector('.redge .nd'); if(jn && jn.offsetWidth){ const a=el.getBoundingClientRect(), j=jn.getBoundingClientRect(); if(a.right>j.left-6 && a.left<j.right && a.bottom>j.top && a.top<j.bottom){ const cl=card.getBoundingClientRect(), mv=Math.min(a.right-(j.left-6), a.left-(cl.left+6)); if(mv>0) el.style.translate=`${Math.round(dx-mv/sc)}px ${dy}px`; } } }); }
 function layGuideH(y){ document.querySelectorAll('.kid.home').forEach(card=>{ let gd=card.querySelector(':scope>.layguideh'); if(y==null){ if(gd) gd.remove(); return; }
   if(!gd){ gd=document.createElement('i'); gd.className='layguideh'; card.appendChild(gd); } gd.style.top=y+'px'; }); }
 function layGuide(x){ document.querySelectorAll('.kid.home').forEach(card=>{ let gd=card.querySelector(':scope>.layguide'); if(x==null){ if(gd) gd.remove(); return; }
@@ -4028,7 +4034,7 @@ function zoneSlots(kid, n, pr){ const Z=ZONE[kid], W=pr.width*Z.w, H=pr.height*Z
 function placeMag(pl, it, sl, size){ const m=document.createElement('div'); m.className='mag'; m._big=it.big; m._col=it.col; m._face=it.face; m._rot=Math.round(sl.rot||0); if(it.id) m._id=it.id; m.innerHTML=starSVG(it.col,it.face); const fs=Math.round(it.big?size:size*0.58);
   m.style.cssText=`left:${sl.x}px;top:${sl.y}px;font-size:${fs}px;transform:translate(-50%,-50%) rotate(${m._rot}deg)`; pl.appendChild(m); return m; }
 // veliki broj u kutu svakog okvira: koliko dijete ima velikih i malih zvjezdica na ploči
-function zCount(){ KIDS.forEach(x=>{ const el=document.querySelector(`.ploca .zcnt[data-zc="${x.id}"]`); if(!el) return; const bn=boardNow(x.id);
+function zCount(){ setTimeout(zFitLabels,0); KIDS.forEach(x=>{ const el=document.querySelector(`.ploca .zcnt[data-zc="${x.id}"]`); if(!el) return; const bn=boardNow(x.id);
   const h = bn ? `<span class="zc">${starSVG('y','smile')}<em>${bn.V}</em></span><span class="zc m">${starSVG('b','smile','m')}<em>${bn.M}</em></span>` : `<span class="zc none">?</span>`;
   { const zc=document.querySelector(`.ploca .zcoin[data-zcoin="${x.id}"]`), hc=bn ? coin(bn.V*(Number(S.post.vrijednostV)||0)+bn.M*(Number(S.post.vrijednostM)||0)) : ''; if(zc && zc._h!==hc){ zc._h=hc; zc.innerHTML=hc; } }   // novčić odmah uz ime
   if(el._h!==h){ const was=el._h; el._h=h; el.innerHTML=h; el.title=bn?`${x.ime}: velikih ${bn.V}, malih ${bn.M}`:`${x.ime}: stanje ploče nije upisano`; el.classList.remove('lft'); const zn=el.closest('.zona'); if(zn && el.getBoundingClientRect().right > zn.getBoundingClientRect().right+4) el.classList.add('lft');   // nema mjesta desno od imena → ispod imena
@@ -4206,6 +4212,7 @@ function fillBoard(){ const pl=$('#ploca'); if(!pl) return; const pr=plR(pl);
       const m=placeMag(pl,it2,sl,size); m._kid=x.id; m._key=key; if(it.id && it2!==it) m._ovr=1; return m; });
     mags.forEach(m=>{ m._ox=parseFloat(m.style.left); m._oy=parseFloat(m.style.top); m._orot=m._rot; });
     B.layout[x.id]={free:slots.slice(items.length), size, mags}; if(sortOf(x.id)!=='djeca') zApplySort(x.id,false); zzMount(x.id); }
+  setTimeout(zFitLabels,0); if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>setTimeout(zFitLabels,0));
   zCount();
   pl.addEventListener('pointerdown', magDown); pl.addEventListener('pointermove', magMove); pl.addEventListener('pointerup', magUp); pl.addEventListener('pointercancel', magUp); }
 /* ---- uređivanje okvira djece (oblik, veličina, mjesto) ---- */
@@ -5219,6 +5226,12 @@ function tvRender(){ if((typeof DR!=='undefined' && DR) || (B&&B.dance)){ clearT
   if(has && sig===TVS.sig){ zCount(); tvFitLabels(); return; }
   const changed = TVS.sig && sig!==TVS.sig; TVS.sig=sig; S.bigBoard=true; openBoard(null); tvDecor(); if(changed) tvWake(); }
 function tvScale(){ const k=Math.min((innerWidth-16)/1600, (innerHeight-16)/900); document.documentElement.style.setProperty('--tvk', Math.max(.2,k).toFixed(4)); }
+// natpis zone (slika + ime + novčić) ne smije ulaziti u brojače desno: u uskim zonama (mobitel) pomakne se ulijevo i po potrebi smanji
+function zFitLabels(){ if(document.body.classList.contains('tv')) return; document.querySelectorAll('.ploca .zona').forEach(z=>{ const b=z.querySelector(':scope>b'), n=z.querySelector(':scope>.zcnt.zcr'); if(!b) return; z.classList.remove('zcdown'); b.style.scale='';
+  if(!n || !n.offsetWidth) return; const br=b.getBoundingClientRect(), nr=n.getBoundingClientRect(), zr=z.getBoundingClientRect();
+  if(br.right>nr.left-4 && br.left<nr.right) z.classList.add('zcdown');   // nema mjesta na rubu → brojači uđu u zonu, ispod ruba
+  const k=(zr.width/z.offsetWidth)||1, max=zr.width*.94; if(br.width>max) b.style.scale=(max/br.width).toFixed(3); }); }
+window.addEventListener('resize', ()=>{ clearTimeout(window.__zfl); window.__zfl=setTimeout(zFitLabels,120); });
 // natpis (gumbi + slika + ime + brojevi) nikad ne smije biti širi od svoje zone – ako jest, cijeli se smanji
 function tvFitLabels(){ document.querySelectorAll('.ploca .zona').forEach(z=>{ const b=z.querySelector(':scope>b'); if(!b) return; b.style.scale=''; const c=null, n=b.querySelector('.zcnt');
   const tot=b.offsetWidth+(c?c.offsetWidth+8:0)+(n&&!n.classList.contains('lft')?n.offsetWidth+12:0), max=z.offsetWidth*.96; if(tot>max) b.style.scale=(max/tot).toFixed(3); }); }
@@ -5323,5 +5336,5 @@ fromHash(); boot();
 })();
 </script>
 
-<script src="demo-ui.js?v=f80b54ede8"></script>
+<script src="demo-ui.js?v=81a86d84ad"></script>
 </body></html>

@@ -5,7 +5,7 @@
    +'#lyrabar button{all:unset;cursor:pointer;min-width:30px;height:30px;padding:0 9px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;gap:5px;background:rgba(255,255,255,.08);color:#fff;font:600 12px/1 system-ui,sans-serif}'
    +'#lyrabar button:hover,#lyrabar button:focus-visible{background:rgba(255,255,255,.2)}'
    +'#lyrabar .ask{display:none}#lyrabar.asking .ask{display:inline-flex}#lyrabar.asking .norm{display:none}'
-   +'#lyrabar.min{opacity:.35}#lyrabar.min:hover{opacity:1}'
+   +'#lyrabar.min{opacity:.55;padding:4px 10px;gap:0}#lyrabar.min b{margin:0;font-size:10px}#lyrabar.min .norm,#lyrabar.min .ask{display:none!important}#lyrabar.min:hover{opacity:1}'
    +'@media (max-width:560px){#lyrabar .lbl{display:none}}';
   var st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
   var deferred=null;
@@ -20,14 +20,14 @@
       +'<button class="norm" id="lyrareset" title="Vrati demo na početak">↺<span class="lbl">Na početak</span></button>'
       +'<span class="ask">Vratiti sve na početak?</span><button class="ask" id="lyrayes">Da</button><button class="ask" id="lyrano">Ne</button>';
     document.body.appendChild(bar);
-    bar.addEventListener('click', function(e){ var t=e.target.closest('button'); if(!t) return; e.stopPropagation();
+    bar.addEventListener('click', function(e){ var t=e.target.closest('button'); if(!t){ e.stopPropagation(); return; } e.stopPropagation();
       if(t.id==='lyrafs') fsToggle();
       else if(t.id==='lyrareset') bar.classList.add('asking');
       else if(t.id==='lyrano') bar.classList.remove('asking');
       else if(t.id==='lyrayes') window.LYRA_DEMO.reset();
       else if(t.id==='lyrainst' && deferred){ deferred.prompt(); deferred.userChoice.finally(function(){ deferred=null; t.hidden=true; }); } }, true);
-    var idle; var wake=function(){ bar.classList.remove('min'); clearTimeout(idle); idle=setTimeout(function(){ bar.classList.add('min'); }, 6000); };
-    ['pointermove','keydown','touchstart'].forEach(function(ev){ document.addEventListener(ev, wake, {passive:true}); }); wake();
+    var idle; var wake=function(){ bar.classList.remove('min'); clearTimeout(idle); idle=setTimeout(function(){ if(!bar.classList.contains('asking')) bar.classList.add('min'); }, 6000); };
+    ['pointerenter','pointerdown','focusin'].forEach(function(ev){ bar.addEventListener(ev, wake, {passive:true}); }); wake();   // traka se smanji u malu oznaku DEMO; otvori se dodirom na nju
     if(window.matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches) document.getElementById('lyrainst').hidden=true;
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', mount); else mount();
