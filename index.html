@@ -926,6 +926,8 @@ html{overflow-x:clip}
 /* kreda: zid iza svega u kartici */
 .kid.home>.kreda{position:absolute;left:0;top:0;width:100%;height:100%;z-index:0;pointer-events:none;border-radius:inherit}
 body.chalking,body.chalking *{cursor:crosshair!important;user-select:none!important}
+#chnib{position:fixed;left:0;top:0;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;border:2.5px solid var(--kc);box-shadow:0 0 0 2px rgba(0,0,0,.45),0 0 10px var(--kc);pointer-events:none;z-index:99999}
+#chnib::after{content:"";position:absolute;left:50%;top:100%;width:2px;height:calc(58px - 14px);margin-left:-1px;background:linear-gradient(var(--kc),transparent);opacity:.55}
 @media (hover:none){.kid.home{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}}
 body.chalking .kid.home{touch-action:none}
 body.erasing,body.erasing *{cursor:cell!important;user-select:none!important}
@@ -1338,7 +1340,7 @@ body.editlay .kid.home [data-lg],body.editlay .kid.home .redge[data-lg] .col{tou
 <input type="file" id="fotoinp" accept="image/*" hidden>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="9" result="b"/><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10" result="g"/><feBlend in="SourceGraphic" in2="g"/></filter></defs></svg>
 
-<script>window.LYRA_VER="278f91f949"</script><script src="demo-db.js?v=278f91f949"></script>
+<script>window.LYRA_VER="1a999c7497"</script><script src="demo-db.js?v=1a999c7497"></script>
 <script>
 (() => {
 const KIDS = [
@@ -2341,7 +2343,11 @@ async function kbSave(k){ const st=kbSt(k), v={b:st.list.map(b=>({t:b.t, fx:+b.f
   try{ await S.dbRaw.collection('postavke').doc('kocke').set(jclone(S.kockeDoc)); }catch(e){} }
 document.addEventListener('pointerdown', e=>{ const el=e.target.closest&&e.target.closest('.kblk .kb'); if(!el||e.button!==0) return; e.preventDefault(); e.stopPropagation(); const k=el.closest('.kblk').dataset.kbk, card=kbCard(k), st=kbSt(k); if(!card||!st.list) return;
   const i=+el.dataset.kb, b=st.list[i], r=el.getBoundingClientRect(); KB.drag={k, i, pid:e.pointerId, ox:e.clientX-r.left, oy:e.clientY-r.top, sx:e.clientX, sy:e.clientY, moved:false, hist:[{x:e.clientX,y:e.clientY,t:performance.now()}]};
-  b.vh=0; b.vx=0; b.v=0; b.hv=null; b.tilt=0; b.rot=null; b.lift=0; b.sus=0; b.susV=0; b.pit=0; kbGo(k); }, true);
+  b.vh=0; b.vx=0; b.v=0; b.hv=null; b.tilt=0; b.rot=null; b.lift=0; b.sus=0; b.susV=0; b.pit=0;
+  if(e.pointerType==='touch'){ KB.drag.ox=r.width/2; KB.drag.oy=r.height/2+TOFF; kbPlace(KB.drag, e.clientX, e.clientY); }   // prst: igračka odmah iskoči iznad prsta
+  kbGo(k); }, true);
+function kbPlace(d, x, y){ const card=kbCard(d.k); if(!card) return; const cr=card.getBoundingClientRect(), W=card.clientWidth, z=KBK[d.k], b=kbSt(d.k).list[d.i];
+  b.fx=Math.max(0,Math.min(1,(x-d.ox-cr.left-card.clientLeft)/(W-z.w))); b.h=Math.max(0,Math.min(card.clientHeight-z.h-kbFloor(d.k)-6,(cr.top+card.clientTop+card.clientHeight-kbFloor(d.k))-(y-d.oy)-z.h)); kbPaint(d.k); }
 addEventListener('pointermove', e=>{ const d=KB.drag; if(!d||e.pointerId!==d.pid) return; const card=kbCard(d.k); if(!card) return; if(!d.moved && Math.hypot(e.clientX-d.sx,e.clientY-d.sy)<4) return;
   if(!d.moved){ d.moved=true; sndAt('tap', performance.now(), .35, card); } const cr=card.getBoundingClientRect(), W=card.clientWidth, z=KBK[d.k], b=kbSt(d.k).list[d.i];
   const now=performance.now(); d.hist.push({x:e.clientX,y:e.clientY,t:now}); while(d.hist.length>2 && now-d.hist[0].t>110) d.hist.shift(); const h0=d.hist[0], dtm=Math.max(16,now-h0.t); b.ang=Math.max(-25,Math.min(25,(e.clientX-h0.x)/dtm*1000/40));
@@ -2381,7 +2387,7 @@ function chSeg(ctx,a,b,mode,rgb){ const dx=b.x-a.x, dy=b.y-a.y, L=Math.hypot(dx,
 function chPt(e,cv){ const r=cv.getBoundingClientRect(); return {x:(e.clientX-r.left)*cv.width/r.width, y:(e.clientY-r.top)*cv.height/r.height}; }
 function chArm(){ if(!CHD || CHD.armed || !CHD.card.isConnected && !CHD.cv.isConnected) return; CHD.armed=true; document.body.classList.add(CHD.mode==='e'?'erasing':'chalking'); try{ getSelection().removeAllRanges(); }catch(_){}
   CHD.ctx=CHD.cv.getContext('2d'); CHD.rgb=chRGB(chColor(CHD.card)); chSeg(CHD.ctx,CHD.last,{x:CHD.last.x+.1,y:CHD.last.y+.1},CHD.mode,CHD.rgb); }
-function chEnd(){ const d=CHD; CHD=null; if(!d) return; clearTimeout(d.timer); document.body.classList.remove('chalking','erasing'); if(!d.armed) return; CH_SUP=performance.now();
+function chEnd(){ const d=CHD; CHD=null; chNib(null); if(!d) return; clearTimeout(d.timer); document.body.classList.remove('chalking','erasing'); if(!d.armed) return; CH_SUP=performance.now();
   const st=chSt(d.k); st.off.width=d.cv.width; st.off.height=d.cv.height; const oc=st.off.getContext('2d'); oc.clearRect(0,0,st.off.width,st.off.height); oc.drawImage(d.cv,0,0); st.ver++;
   const vis=chCanvas(d.k); if(vis && vis!==d.cv){ const vc=vis.getContext('2d'); vc.clearRect(0,0,vis.width,vis.height); vc.drawImage(st.off,0,0,vis.width,vis.height); } chMap(d.k,vis||d.cv);
   if(kbSt(d.k).list) kbGo(d.k); clearTimeout(st.saveT); st.saveT=setTimeout(()=>chSave(d.k),700); }
@@ -2394,13 +2400,17 @@ function chLoad(k,d){ const st=chSt(k); if(!d || (d.ts||0)<=st.ts || (CHD&&CHD.k
 function chListen(){ setTimeout(()=>{ CH_SNAP=true; chReady(); }, 6000);   // ako baza krede ne odgovori, igračke ipak krenu
   try{ S.realDb.collection('kreda').onSnapshot(q=>{ q.docs.forEach(d=>chLoad(d.id, d.data())); if(snapDef(q)){ CH_SNAP=true; chReady(); } }, ()=>{ CH_SNAP=true; chReady(); }); }catch(e){ CH_SNAP=true; } }
 let CH_SND=0;
+// dodir: ono što prst crta ili nosi pomaknuto je iznad prsta (da se vidi), TOFF px
+const TOFF=58;
+function chNib(x,y,col){ let n=document.getElementById('chnib'); if(x==null){ if(n) n.remove(); return; } if(!n){ n=document.createElement('div'); n.id='chnib'; n.setAttribute('aria-hidden','true'); document.body.appendChild(n); } n.style.setProperty('--kc', col||'#f2c968'); n.style.translate=`${Math.round(x)}px ${Math.round(y)}px`; }
 // dodir (mobitel/tablet): drži prst na kartici ~0,45 s → kreda; pomak prije toga = obično listanje stranice
 window.addEventListener('pointerdown', e=>{ if(e.pointerType!=='touch' || CHD || S.layEdit || !CH_SNAP || !e.isPrimary) return;
   const card=e.target.closest && e.target.closest('.kid.home'); if(!card || e.target.closest('.kblk .kb')) return; const cv=card.querySelector(':scope > canvas.kreda'); if(!cv) return;
-  CHD={k:cv.dataset.kreda, card, cv, pid:e.pointerId, mode:'d', armed:false, touch:true, sx:e.clientX, sy:e.clientY, last:chPt(e,cv), timer:0};
-  CHD.timer=setTimeout(()=>{ const d=CHD; if(!d || !d.touch || d.armed) return; chArm(); try{ navigator.vibrate && navigator.vibrate(15); }catch(_){} sndAt('kreda', performance.now(), .5, d.card); }, 450); }, true);
+  const up={clientX:e.clientX, clientY:e.clientY-TOFF};
+  CHD={k:cv.dataset.kreda, card, cv, pid:e.pointerId, mode:'d', armed:false, touch:true, sx:e.clientX, sy:e.clientY, last:chPt(up,cv), timer:0};
+  CHD.timer=setTimeout(()=>{ const d=CHD; if(!d || !d.touch || d.armed) return; chArm(); chNib(d.sx, d.sy-TOFF, chColor(d.card)); try{ navigator.vibrate && navigator.vibrate(15); }catch(_){} sndAt('kreda', performance.now(), .5, d.card); }, 450); }, true);
 document.addEventListener('touchmove', e=>{ const d=CHD; if(!d || !d.touch) return; const t=e.touches[0]; if(!t) return;
-  if(d.armed){ e.preventDefault(); const p=chPt(t,d.cv); chSeg(d.ctx,d.last,p,d.mode,d.rgb); const L=Math.hypot(p.x-d.last.x,p.y-d.last.y); d.last=p; const now=performance.now(); if(L>2 && now-CH_SND>70){ CH_SND=now; sndAt('kreda', now, Math.min(1,.4+L/30), d.card); } return; }
+  if(d.armed){ e.preventDefault(); const p=chPt({clientX:t.clientX, clientY:t.clientY-TOFF},d.cv); chNib(t.clientX, t.clientY-TOFF); chSeg(d.ctx,d.last,p,d.mode,d.rgb); const L=Math.hypot(p.x-d.last.x,p.y-d.last.y); d.last=p; const now=performance.now(); if(L>2 && now-CH_SND>70){ CH_SND=now; sndAt('kreda', now, Math.min(1,.4+L/30), d.card); } return; }
   if(Math.hypot(t.clientX-d.sx, t.clientY-d.sy)>10){ clearTimeout(d.timer); CHD=null; } }, {passive:false, capture:true});
 document.addEventListener('touchend', e=>{ if(CHD && CHD.touch && !e.touches.length) chEnd(); }, true);
 document.addEventListener('touchcancel', e=>{ if(CHD && CHD.touch) chEnd(); }, true);
@@ -4287,13 +4297,14 @@ function magSurprise(m, on, moved){ const sv=m.querySelector('svg.st')||m.queryS
   m._supT=setTimeout(fin, 230); }
 function magDown(e){ if(e.button>0) return; if(B&&(B.swapping||B.dance)) return; if(B&&B.zed){ zoneDown(e); return; } const m=e.target.closest('.mag'); if(!m||!B||m._busy||zzIsBusy(m._kid)||document.querySelector('.xfer')) return; e.preventDefault();
   const pl=$('#ploca'); try{ m.setPointerCapture(e.pointerId); }catch(_){}
-  DR={m, pl, pr:plR(pl), x0:parseFloat(m.style.left), y0:parseFloat(m.style.top), sx:e.clientX, sy:e.clientY, moved:false};
+  DR={m, pl, pr:plR(pl), x0:parseFloat(m.style.left), y0:parseFloat(m.style.top), sx:e.clientX, sy:e.clientY, moved:false, lift:0};
+  if(e.pointerType==='touch'){ DR.lift=TOFF/DR.pr.k; m.style.top=Math.max(10, DR.y0-DR.lift)+'px'; }   // prst: zvjezdica iznad prsta, spusti se gdje se vidi
   m.classList.add('drag'); m.style.transform=magTf(m,1.25); magSurprise(m,true); }
 function magMove(e){ if(ZD){ zoneMove(e); return; } if(!DR) return; const dx=(e.clientX-DR.sx)/DR.pr.k, dy=(e.clientY-DR.sy)/DR.pr.k; if(!DR.moved && Math.hypot(dx,dy)*DR.pr.k<4) return; DR.moved=true;
-  const W=DR.pr.width, H=DR.pr.height, nx=Math.max(10,Math.min(W-10,DR.x0+dx)), ny=Math.max(10,Math.min(H-10,DR.y0+dy));
+  const W=DR.pr.width, H=DR.pr.height, nx=Math.max(10,Math.min(W-10,DR.x0+dx)), ny=Math.max(10,Math.min(H-10,DR.y0+dy-DR.lift));
   DR.m.style.left=nx+'px'; DR.m.style.top=ny+'px';
   const z=zoneAt(nx/W, ny/H); DR.pl.querySelectorAll('.zona').forEach((el,i)=>{ const id=KIDS[i].id; el.classList.toggle('hov', id===z); el.classList.toggle('tuđa', id===z && z!==DR.m._kid); }); }
-function magUp(e){ if(ZD){ zoneUp(); return; } if(!DR) return; const {m,pl,pr,moved}=DR, x0=DR.x0, y0=DR.y0; DR=null; magSurprise(m,false,moved);
+function magUp(e){ if(ZD){ zoneUp(); return; } if(!DR) return; const {m,pl,pr,moved}=DR, x0=DR.x0, y0=DR.y0; if(!moved && DR.lift) m.style.top=y0+'px'; DR=null; magSurprise(m,false,moved);
   m.classList.remove('drag'); m.style.zIndex=String(++ZTOP); pl.querySelectorAll('.zona').forEach(el=>el.classList.remove('hov','tuđa'));
   if(!moved){ m.style.transform=magTf(m); if(zaPlay(m,'klik',e)) return; if(!RM()) m.animate([{transform:magTf(m)},{transform:magTf(m,1.3)+' translateY(-6px)'},{transform:magTf(m,.92)},{transform:magTf(m)}],{duration:420,easing:'ease-out'}); return; }
   m._rot=Math.round(m._rot+(Math.random()-.5)*14); m.style.transform=magTf(m);
@@ -5355,5 +5366,5 @@ fromHash(); boot();
 })();
 </script>
 
-<script src="demo-ui.js?v=278f91f949"></script>
+<script src="demo-ui.js?v=1a999c7497"></script>
 </body></html>
