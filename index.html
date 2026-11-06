@@ -1329,7 +1329,7 @@ body.editlay .kid.home [data-lg],body.editlay .kid.home .redge[data-lg] .col{tou
 <input type="file" id="fotoinp" accept="image/*" hidden>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="9" result="b"/><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10" result="g"/><feBlend in="SourceGraphic" in2="g"/></filter></defs></svg>
 
-<script>window.LYRA_VER="0ed3a4ba5a"</script><script src="demo-db.js?v=0ed3a4ba5a"></script>
+<script>window.LYRA_VER="322961a118"</script><script src="demo-db.js?v=322961a118"></script>
 <script>
 (() => {
 const KIDS = [
@@ -2574,12 +2574,7 @@ const PET_LAST={};
 function petRandTrick(kid){ const R=kidLevel(kid).R, ok=TRICKS.filter((t,i)=>trickLv(i)<=R).map(t=>t.id); let c=ok.filter(id=>id!==PET_LAST[kid]); if(!c.length) c=ok; const id=c[Math.floor(Math.random()*c.length)]; PET_LAST[kid]=id; return id; }
 function petButton(kid){ const P=PETS[kid]; if(P){ if(!P.trick || (P.trick.id!=='_out' && P.trick.id!=='_in')) petHome(kid); return; } petCall(kid, petRandTrick(kid), false); }
 function mascRun(kid){ if(Object.keys(PETS).length) return false; return petCall(kid, 'trk', true); }
-// ponekad (kad nitko ništa ne radi) jedna maskota sama izađe
-const MASC_IDLE={next:performance.now()+70000};
-setInterval(()=>{ const now=performance.now(); if(now<MASC_IDLE.next) return; MASC_IDLE.next=now+60000+Math.random()*90000;
-  if(document.visibilityState!=='visible' || S.view!=='pregled' || Object.keys(PETS).length || KB.drag || document.querySelector('#layer .drawer, .ov')) return;
-  try{ if(matchMedia('(prefers-reduced-motion: reduce)').matches) return; }catch(e){}
-  const ks=KIDS.map(k=>k.id); mascRun(ks[Math.floor(Math.random()*ks.length)], true); }, 4000);
+// ljubimac nikad ne izlazi sam – samo kad ga dijete pozove tipkom na kartici
 
 /* ===================== TAB „🐾 LJUBIMCI“: ponuda ljubimaca, svako dijete bira svog ===================== */
 const LJ_GRUPE=[['jednorog','🦄 Jednorozi'],['auti','🚗 Autići'],['slatki','🐾 Slatki ljubimci'],['kocke','🧱 Ljubimci od kocaka']];
@@ -3535,7 +3530,7 @@ function lvCeremony(kid, R, {from, force, demo, onEnd}={}){ if(LVC) return; cons
   C.setup && C.setup(c);
   const t0=performance.now()+60, bus=musPlay(LV_SONG_OF(C,kid), t0); let ended=false, skipAt=null;
   LVC={kid, root, bus};
-  const finish=()=>{ if(ended) return; ended=true; musStop(bus); root.remove(); LVC=null; if(!demo && ti>=0) setTimeout(()=>{ if(S.view==='pregled' && !Object.keys(PETS).length) petCall(kid, TRICKS[ti].id, true); },500); onEnd && onEnd(); };
+  const finish=()=>{ if(ended) return; ended=true; musStop(bus); root.remove(); LVC=null; onEnd && onEnd(); };   // ljubimac se ne pojavljuje sam ni nakon nove razine
   let tAcc=0, tLast=null;   // vrijeme ceremonije teče samo dok se kadrovi crtaju (skrivena kartica ne „pojede“ ceremoniju)
   root.addEventListener('click', ()=>{ if(tAcc<1.2 || skipAt!=null) return; skipAt=tAcc; musStop(bus); });
   if(RM()){ C.f(C.d*.7,c); setTimeout(finish, 3500); return; }
@@ -5321,5 +5316,5 @@ fromHash(); boot();
 })();
 </script>
 
-<script src="demo-ui.js?v=0ed3a4ba5a"></script>
+<script src="demo-ui.js?v=322961a118"></script>
 </body></html>
