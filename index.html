@@ -349,7 +349,7 @@ span.coin b{display:inline;font-weight:800;font-size:1.05em;color:var(--tx) !imp
   background:radial-gradient(500px 160px at 15% 0%, rgba(242,201,104,.10), transparent 70%), var(--glass)}
 .hero h2{font-size:19px;font-weight:600}
 .hero p{margin:2px 0 0;font-size:13px;color:var(--muted)}
-.gives{display:flex;gap:14px;align-items:center;margin:-8px 0}
+.gives{display:flex;gap:30px;align-items:center;margin:-8px 0}
 .give{position:relative;border:0;background:none;padding:2px;line-height:0;border-radius:24px;cursor:pointer}
 .give .st{transition:transform .18s, filter .18s;filter:drop-shadow(0 4px 8px rgba(0,0,0,.35))}
 .give.v .st{width:92px;height:92px}
@@ -1104,6 +1104,10 @@ body.editlay .kid.home [data-lg],body.editlay .kid.home .redge[data-lg] .col{tou
 .prt.dot{width:7px;height:7px;border-radius:50%}
 
 .srwrap{position:absolute;top:10px;left:10px;z-index:5;text-align:left}
+.kidtop .srwrap{left:calc(85.4% - 17px);top:calc(14.6% - 19px);z-index:6}   /* zvonce sjedi na okviru slike, gore desno */
+.kidtop .srico{width:34px;height:34px;background:#2a2410;border-color:rgba(242,201,104,.7);box-shadow:0 3px 10px rgba(0,0,0,.45)}
+.kidtop .srpop{left:50%;margin-left:-145px;z-index:30}
+.kid.home>.kidtop:has(.srpop){z-index:9!important}
 .srico{position:relative;width:38px;height:38px;border-radius:50%;border:1px solid rgba(242,201,104,.45);background:rgba(242,201,104,.10);color:#f2c968;display:grid;place-items:center;padding:0;cursor:pointer}
 .srico:hover,.srico[aria-expanded="true"]{background:rgba(242,201,104,.22)}
 .srn{position:absolute;top:-5px;right:-6px;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:var(--gold);color:#2b1d00;font-size:11.5px;font-weight:800;line-height:19px;text-align:center;box-shadow:0 0 0 2px var(--surface)}
@@ -1201,7 +1205,7 @@ body.editlay .kid.home [data-lg],body.editlay .kid.home .redge[data-lg] .col{tou
 .shop .lap .u{font-size:15px;color:var(--muted);margin:0 2px 0 -2px}
 .shop .lap .lapr{font-size:12.5px;color:var(--muted);display:inline-flex;align-items:center;gap:4px}
 .shop .lap .lapr .st{font-size:16px}
-.give-k{border:0;background:none;padding:4px;line-height:0;border-radius:50%;opacity:.45;align-self:flex-end;margin-left:-4px;transition:opacity .15s,transform .15s}
+.give-k{border:0;background:none;padding:4px;line-height:0;border-radius:50%;opacity:.45;align-self:center;margin-left:0;transition:opacity .15s,transform .15s}
 .give-k .st{width:26px;height:26px}
 .give-k:hover,.give-k:focus-visible{opacity:1;transform:scale(1.1)}
 .give-k.on{opacity:.8}
@@ -1218,7 +1222,7 @@ body.editlay .kid.home [data-lg],body.editlay .kid.home .redge[data-lg] .col{tou
 .give.m .gplus{width:20px;height:20px;font-size:16px;line-height:20px;right:0;top:10%}
 .give:hover .st,.give:focus-visible .st{transform:scale(1.1) rotate(-8deg);filter:drop-shadow(0 0 14px rgba(242,201,104,.45))}
 .give:focus-visible{outline:2px solid var(--gold-line);outline-offset:4px}
-@media (max-width:640px){.hero{grid-template-columns:minmax(0,1fr)}.gives{justify-content:center;gap:28px}}
+@media (max-width:640px){.hero{grid-template-columns:minmax(0,1fr)}.gives{justify-content:center;gap:34px}}
 .ava{--s:44px;width:var(--s);height:var(--s);border-radius:50%;flex:none;position:relative;display:grid;place-items:center;overflow:hidden;
   background:radial-gradient(circle at 35% 30%, color-mix(in srgb,var(--kc) 55%, #fff 10%), color-mix(in srgb,var(--kc) 35%, #0b131c));
   box-shadow:0 0 0 2px color-mix(in srgb,var(--kc) 75%,transparent), 0 0 0 5px rgba(11,19,28,.9), 0 0 0 6px color-mix(in srgb,var(--kc) 30%,transparent)}
@@ -1329,7 +1333,7 @@ body.editlay .kid.home [data-lg],body.editlay .kid.home .redge[data-lg] .col{tou
 <input type="file" id="fotoinp" accept="image/*" hidden>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="9" result="b"/><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10" result="g"/><feBlend in="SourceGraphic" in2="g"/></filter></defs></svg>
 
-<script>window.LYRA_VER="322961a118"</script><script src="demo-db.js?v=322961a118"></script>
+<script>window.LYRA_VER="5ef5393473"</script><script src="demo-db.js?v=5ef5393473"></script>
 <script>
 (() => {
 const KIDS = [
@@ -2658,8 +2662,7 @@ function renderPregled(all){
     h += `<div class="kcol">`;
     h += `<section class="panel kid home th-${k.id} lv${LV}${strip?' strip':''}" style="--kc:${k.kc}"><canvas class="kreda" data-kreda="${k.id}" aria-hidden="true"></canvas>${kdeco(k)}<div class="kblk" data-kbk="${k.id}"></div><button type="button" class="petbtn${PETS[k.id]?' out':''}" data-pet="${k.id}" title="Pozovi: ${esc(petDef(k.id).ime)}" aria-label="Pozovi ljubimca ${esc(petDef(k.id).ime)}">${petDef(k.id).svg}</button>
       ${rankHtml(k.id)}
-      <div class="kidtop"><button class="avabtn" type="button" aria-label="Razigraj – ${esc(k.ime)}" title="Klikni me!">${afr(k, ava(k))}</button><button class="kname" type="button" aria-label="${esc(k.ime)}"><h2>${[...k.ime].map((c,i)=>`<span class="ch" style="--i:${i}">${esc(c)}</span>`).join('')}<span class="go" aria-hidden="true">›</span></h2></button></div>
-      ${(()=>{ const ow=ofKid(k.id).filter(z=>status(z)==='owe').sort((a,b)=>(b.datum||'').localeCompare(a.datum||'')); if(!ow.length) return ''; const op=S.srOpen===k.id; return `<div class="srwrap"><button class="srico" data-sropen="${k.id}" aria-expanded="${op}" title="Za srediti: ${ow.length}" aria-label="Za srediti (${ow.length})"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 3a6 6 0 0 0-6 6v3.6L4.3 15.4A1 1 0 0 0 5.2 17h13.6a1 1 0 0 0 .9-1.6L18 12.6V9a6 6 0 0 0-6-6zm-2 15a2 2 0 0 0 4 0z" fill="currentColor"/></svg><span class="srn">${ow.length}</span></button>${op?`<div class="srpop" role="menu"><div class="srh">Za srediti <span>${ow.length}</span></div>${ow.map(z=>`<button class="srrow" role="menuitem" data-z="${esc(z.id)}">${STAR(z.zvjezdica==='M'?'m':'')}<span class="t">${esc(z.predmet||'petica')}</span><span class="d">${fmtS(z.datum)}</span><span class="sr">Sredi</span></button>`).join('')}</div>`:''}</div>`; })()}
+      <div class="kidtop"><button class="avabtn" type="button" aria-label="Razigraj – ${esc(k.ime)}" title="Klikni me!">${afr(k, ava(k))}</button><button class="kname" type="button" aria-label="${esc(k.ime)}"><h2>${[...k.ime].map((c,i)=>`<span class="ch" style="--i:${i}">${esc(c)}</span>`).join('')}<span class="go" aria-hidden="true">›</span></h2></button>${(()=>{ const ow=ofKid(k.id).filter(z=>status(z)==='owe').sort((a,b)=>(b.datum||'').localeCompare(a.datum||'')); if(!ow.length) return ''; const op=S.srOpen===k.id; return `<div class="srwrap"><button class="srico" data-sropen="${k.id}" aria-expanded="${op}" title="Za srediti: ${ow.length}" aria-label="Za srediti (${ow.length})"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 3a6 6 0 0 0-6 6v3.6L4.3 15.4A1 1 0 0 0 5.2 17h13.6a1 1 0 0 0 .9-1.6L18 12.6V9a6 6 0 0 0-6-6zm-2 15a2 2 0 0 0 4 0z" fill="currentColor"/></svg><span class="srn">${ow.length}</span></button>${op?`<div class="srpop" role="menu"><div class="srh">Za srediti <span>${ow.length}</span></div>${ow.map(z=>`<button class="srrow" role="menuitem" data-z="${esc(z.id)}">${STAR(z.zvjezdica==='M'?'m':'')}<span class="t">${esc(z.predmet||'petica')}</span><span class="d">${fmtS(z.datum)}</span><span class="sr">Sredi</span></button>`).join('')}</div>`:''}</div>`; })()}</div>
       <div class="boardnote">${plocaNote(k.id).replace(/ ?<button class="bn-ed"[^>]*>✎<\/button>/g,'')}</div>
     </section><div class="kunder" style="--kc:${k.kc}">${pendH}<div class="boardnote bnsub">${plocaNote(k.id).replace(/ ?<button class="bn-ed"[^>]*>✎<\/button>/g,'')}</div><button type="button" class="kset" data-go="${k.id}" title="Postavke i popis – ${esc(k.ime)}" aria-label="Postavke – ${esc(k.ime)}">⚙</button><button type="button" class="kclr" data-kclr="${k.id}" title="Obriši sve crteže kredom" aria-label="Obriši kredu – ${esc(k.ime)}">🧽</button></div></div>`;
   }
@@ -5316,5 +5319,5 @@ fromHash(); boot();
 })();
 </script>
 
-<script src="demo-ui.js?v=322961a118"></script>
+<script src="demo-ui.js?v=5ef5393473"></script>
 </body></html>
