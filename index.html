@@ -996,6 +996,7 @@ body.editlay .kid.home [data-lg],body.editlay .kid.home .redge[data-lg] .col{tou
 .redge.e6 .nd{display:flex;align-items:center;gap:3px;font-size:13px;padding:2px 7px 2px 9px}.redge.e6 .nd b{color:#fff;font:400 17px 'Luckiest Guy','Lilita One',var(--f-display);text-shadow:var(--tol);line-height:1}.redge.e6 .nd svg{width:18px;height:18px}
 /* V7–V9: staza + traka na donjem rubu kartice (u toku kartice, uvijek dolje) */
 
+@media (max-width:640px){.kid.home .redge.e6 .nd{right:-12px;z-index:2;padding:2px 6px 2px 7px;bottom:auto;top:calc((100 - var(--p)) * 1%)}}   /* mobitel: „još N“ sjedi na stupu uz desni rub kartice; gornji rub oznake = vrh obojenog dijela stupa */
 .galtab td.gk:has(.redge.e6){padding-right:46px}.galtab .redge.e6{--t6:58px}
 .rank .med{position:relative;line-height:0;filter:drop-shadow(0 4px 6px rgba(0,0,0,.45))}
 .rank .num{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;line-height:1;color:#fff;pointer-events:none}
@@ -1335,7 +1336,7 @@ body.editlay .kid.home [data-lg],body.editlay .kid.home .redge[data-lg] .col{tou
 <input type="file" id="fotoinp" accept="image/*" hidden>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="9" result="b"/><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10" result="g"/><feBlend in="SourceGraphic" in2="g"/></filter></defs></svg>
 
-<script>window.LYRA_VER="81a86d84ad"</script><script src="demo-db.js?v=81a86d84ad"></script>
+<script>window.LYRA_VER="100815e949"</script><script src="demo-db.js?v=100815e949"></script>
 <script>
 (() => {
 const KIDS = [
@@ -5336,5 +5337,5 @@ fromHash(); boot();
 })();
 </script>
 
-<script src="demo-ui.js?v=81a86d84ad"></script>
+<script src="demo-ui.js?v=100815e949"></script>
 </body></html>

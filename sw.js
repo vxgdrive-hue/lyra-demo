@@ -1,6 +1,6 @@
 /* Lyra demo – offline. Datoteke imaju verziju u imenu (?v=), pa nova objava uvijek dođe; stara se briše. */
-const VER='lyra-81a86d84ad';
-const CORE=['./','demo-db.js?v=81a86d84ad','demo-ui.js?v=81a86d84ad','manifest.webmanifest','icons/icon-192.png','icons/icon-512.png','demo/toni.webp','demo/ema.webp','demo/malisa.webp'];
+const VER='lyra-100815e949';
+const CORE=['./','demo-db.js?v=100815e949','demo-ui.js?v=100815e949','manifest.webmanifest','icons/icon-192.png','icons/icon-512.png','demo/toni.webp','demo/ema.webp','demo/malisa.webp'];
 self.addEventListener('install', e=>{ e.waitUntil(caches.open(VER).then(c=>c.addAll(CORE.map(u=>new Request(u,{cache:'reload'})))).then(()=>self.skipWaiting())); });
 self.addEventListener('activate', e=>{ e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==VER).map(k=>caches.delete(k)))).then(()=>self.clients.claim())); });
 self.addEventListener('fetch', e=>{ const r=e.request; if(r.method!=='GET') return;
